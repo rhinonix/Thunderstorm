@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Maritime Security Monitor Charts</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<script src="airtable.browser.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
+</head>
+<body>
+
+    <div style="overflow-x: auto">
+        <div class="chart-container" style="position: relative; width:1000px">
+        <canvas id="RegionChart"></canvas>
+      </div>
+    </div>
+
+<script>
+
+var regiontoparse = "West Africa / Gulf of Guinea"
+
+    function updateobj(){
+        objpiracy= "[";
+for (let i = 0; i < datopiracy.length; i++) {
+    objpiracy = objpiracy + `{ "date": "` + datopiracy[i].date + `", "numo": ` + datopiracy[i].numo + `, "incidents": "` + datopiracy[i].incidents  + `" },`;
+if (i === datopiracy.length -1) {
+    objpiracy = objpiracy.slice(0, -1)
+    objpiracy = objpiracy + ']'
+    data.datasets[0].data = JSON.parse(objpiracy)
+}
+    }
+
+objsmuggling= "[";
+for (let i = 0; i < datosmuggling.length; i++) {
+    objsmuggling = objsmuggling + `{ "date": "` + datosmuggling[i].date + `", "numo": ` + datosmuggling[i].numo + `, "incidents": "` + datosmuggling[i].incidents  + `" },`;
+if (i === datosmuggling.length -1) {
+    objsmuggling = objsmuggling.slice(0, -1)
+    objsmuggling = objsmuggling + ']'
+    data.datasets[1].data = JSON.parse(objsmuggling)
+}
+    }
+
+objsighting= "[";
+for (let i = 0; i < datosighting.length; i++) {
+    objsighting = objsighting + `{ "date": "` + datosighting[i].date + `", "numo": ` + datosighting[i].numo + `, "incidents": "` + datosighting[i].incidents  + `" },`;
+if (i === datosighting.length -1) {
+    objsighting = objsighting.slice(0, -1)
+    objsighting = objsighting + ']'
+    data.datasets[2].data = JSON.parse(objsighting)
+}
+    }
+
+objsuspicious= "[";
+for (let i = 0; i < datosuspicious.length; i++) {
+objsuspicious = objsuspicious + `{ "date": "` + datosuspicious[i].date + `", "numo": ` + datosuspicious[i].numo + `, "incidents": "` + datosuspicious[i].incidents  + `" },`;
+if (i === datosuspicious.length -1) {
+    objsuspicious = objsuspicious.slice(0, -1)
+    objsuspicious = objsuspicious + ']'
+    data.datasets[3].data = JSON.parse(objsuspicious)
+}
+    }
+
+objother= "[";
+for (let i = 0; i < datoother.length; i++) {
+    objother = objother + `{ "date": "` + datoother[i].date + `", "numo": ` + datoother[i].numo + `, "incidents": "` + datoother[i].incidents  + `" },`;
+if (i === datoother.length -1) {
+    objother = objother.slice(0, -1)
+    objother = objother + ']'
+    data.datasets[4].data = JSON.parse(objother)
+}
+    }
+
+objmilitary= "[";
+for (let i = 0; i < datomilitary.length; i++) {
+    objmilitary = objmilitary + `{ "date": "` + datomilitary[i].date + `", "numo": ` + datomilitary[i].numo + `, "incidents": "` + datomilitary[i].incidents  + `" },`;
+if (i === datomilitary.length -1) {
+    objmilitary = objmilitary.slice(0, -1)
+    objmilitary = objmilitary + ']'
+    data.datasets[5].data = JSON.parse(objmilitary)
+}
+    }
+    }
+
+
+var Airtable = require("airtable");
+var base = new Airtable({apiKey: "keyuUZyV0hDdywJXd"}).base("appTQE7hkdQqfhnQV");
+var regiontable = [];
+
+base("Regions").select({
+    view: "Region List"
+}).eachPage(function page(records, fetchNextPage) {
+    records.forEach(function(record, idx) {
+        const regionitem = [];
+        const incidentsitem = [];
+        const operationsitem = [];
+        dates = [];
+        datespiracy = [];
+        datopiracy = [];
+        datessmuggling = [];
+        datosmuggling = [];
+        datessighting = [];
+        datosighting = [];
+        datessuspicious = [];
+        datosuspicious = [];
+        datesother = [];
+        datoother = [];
+        datesmilitary = [];
+        datomilitary = [];
+
+regionitem["Region"] = record.get('Name');
+if (record.get('Incidents')) {
+for (let i = 0; i < record.get('Incidents').length; i++) {
+base('Incidents').find(record.get('Incidents')[i], function(erro, recordi) {
+if (erro) { console.error(erro); return; }
+const incidentsitems = [];
+incidentsitems["Incident"] = recordi.fields.Incident
+incidentsitems["Type"] = recordi.fields.Type
+incidentsitems["Date"] = recordi.fields.Date.substring(0, 10);
+if (recordi.fields.Description){
+description = recordi.fields.Description.replace(/(\r\n|\n|\r)/gm,"");
+description = description.replaceAll(`"`,`'`);
+description = description.replaceAll(`’`,`'`);
+description = description.replaceAll(`‘`,`'`);
+}else {
+    description = "";
+}
+incidento = recordi.fields.Incident.replaceAll(`"`,`'`);
+incidentsitem.push(incidentsitems);
+if(regiontoparse.toLowerCase().replaceAll(` `,``) === record.get('Name').toLowerCase().replaceAll(` `,``)){
+    dates.push(recordi.fields.Date.substring(0, 10).slice(0, 7));
+if (recordi.fields.Type === "Piracy") {
+datespiracy.push(recordi.fields.Date.substring(0, 10).slice(0, 7));
+counts = {};
+for (const num of datespiracy) {
+  counts[num] = counts[num] ? counts[num] + 1 : 1;
+}
+found = datopiracy.findIndex(element => element.date === recordi.fields.Date.substring(0, 10).slice(0, 7));
+if (found !== -1) {
+datopiracy[found].date = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datopiracy[found].numo = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datopiracy[found].incidents = datopiracy[found].incidents + `<p><b style='color:` + data.datasets[0].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+} else{
+const datopiracyitems = [];
+datopiracyitems["date"] = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datopiracyitems["numo"] = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datopiracyitems["incidents"] = `<p><b style='color:` + data.datasets[0].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+datopiracy.push(datopiracyitems);
+}
+}else if (recordi.fields.Type === "Smuggling") {
+datessmuggling.push(recordi.fields.Date.substring(0, 10).slice(0, 7));
+counts = {};
+for (const num of datessmuggling) {
+  counts[num] = counts[num] ? counts[num] + 1 : 1;
+}
+found = datosmuggling.findIndex(element => element.date === recordi.fields.Date.substring(0, 10).slice(0, 7));
+if (found !== -1) {
+datosmuggling[found].date = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datosmuggling[found].numo = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datosmuggling[found].incidents = datosmuggling[found].incidents + `<p><b style='color:` + data.datasets[1].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+} else{
+const datosmugglingitems = [];
+datosmugglingitems["date"] = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datosmugglingitems["numo"] = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datosmugglingitems["incidents"] = `<p><b style='color:` + data.datasets[1].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+datosmuggling.push(datosmugglingitems);
+}
+}else if (recordi.fields.Type === "Sighting") {
+datessighting.push(recordi.fields.Date.substring(0, 10).slice(0, 7));
+counts = {};
+for (const num of datessighting) {
+  counts[num] = counts[num] ? counts[num] + 1 : 1;
+}
+found = datosighting.findIndex(element => element.date === recordi.fields.Date.substring(0, 10).slice(0, 7));
+if (found !== -1) {
+datosighting[found].date = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datosighting[found].numo = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datosighting[found].incidents = datosighting[found].incidents + `<p><b style='color:` + data.datasets[2].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+} else{
+const datosightingitems = [];
+datosightingitems["date"] = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datosightingitems["numo"] = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datosightingitems["incidents"] = `<p><b style='color:` + data.datasets[2].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+datosighting.push(datosightingitems);
+}
+}else if (recordi.fields.Type === "Suspicious Approach") {
+datessuspicious.push(recordi.fields.Date.substring(0, 10).slice(0, 7));
+counts = {};
+for (const num of datessuspicious) {
+  counts[num] = counts[num] ? counts[num] + 1 : 1;
+}
+found = datosuspicious.findIndex(element => element.date === recordi.fields.Date.substring(0, 10).slice(0, 7));
+if (found !== -1) {
+datosuspicious[found].date = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datosuspicious[found].numo = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datosuspicious[found].incidents = datosuspicious[found].incidents + `<p><b style='color:` + data.datasets[3].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+} else{
+const datosuspiciousitems = [];
+datosuspiciousitems["date"] = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datosuspiciousitems["numo"] = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datosuspiciousitems["incidents"] = `<p><b style='color:` + data.datasets[3].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+datosuspicious.push(datosuspiciousitems);
+}
+}else if (recordi.fields.Type === "Other") {
+datesother.push(recordi.fields.Date.substring(0, 10).slice(0, 7));
+counts = {};
+for (const num of datesother) {
+  counts[num] = counts[num] ? counts[num] + 1 : 1;
+}
+found = datoother.findIndex(element => element.date === recordi.fields.Date.substring(0, 10).slice(0, 7));
+if (found !== -1) {
+datoother[found].date = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datoother[found].numo = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datoother[found].incidents = datoother[found].incidents + `<p><b style='color:` + data.datasets[4].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+} else{
+const datootheritems = [];
+datootheritems["date"] = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datootheritems["numo"] = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datootheritems["incidents"] = `<p><b style='color:` + data.datasets[4].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+datoother.push(datootheritems);
+}
+}else if (recordi.fields.Type === "Military Action") {
+datesmilitary.push(recordi.fields.Date.substring(0, 10).slice(0, 7));
+counts = {};
+for (const num of datesmilitary) {
+  counts[num] = counts[num] ? counts[num] + 1 : 1;
+}
+found = datomilitary.findIndex(element => element.date === recordi.fields.Date.substring(0, 10).slice(0, 7));
+if (found !== -1) {
+datomilitary[found].date = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datomilitary[found].numo = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datomilitary[found].incidents = datomilitary[found].incidents + `<p><b style='color:` + data.datasets[5].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+} else{
+const datomilitaryitems = [];
+datomilitaryitems["date"] = recordi.fields.Date.substring(0, 10).slice(0, 7)
+datomilitaryitems["numo"] = counts[recordi.fields.Date.substring(0, 10).slice(0, 7)]
+datomilitaryitems["incidents"] = `<p><b style='color:` + data.datasets[5].backgroundColor + `'>-` + recordi.fields.Type + `:</b> ` + incidento + `<br>Happened in ` + recordi.fields.Date.substring(0, 10) + `<br>` + description + `</p>`
+datomilitary.push(datomilitaryitems);
+}
+}
+}
+
+if(i === record.get('Incidents').length-1){
+updateobj()
+myChart.update();
+}
+
+});
+}
+regionitem["Incidents"] = incidentsitem;
+}
+if (record.get('Operations')) {
+for (let ii = 0; ii < record.get('Operations').length; ii++) {
+base('Operations').find(record.get('Operations')[ii], function(error, recordii) {
+if (error) { console.error(error); return; }
+const operationsitems = [];
+operationsitems["Operation"] = recordii.fields.Name
+if (recordii.fields["Start Date"]) {
+operationsitems["Start Date"] = recordii.fields["Start Date"]
+}
+if (recordii.fields["End Date"]) {
+operationsitems["End Date"] = recordii.fields["End Date"]
+}
+operationsitem.push(operationsitems);
+});
+}
+regionitem["Operations"] = operationsitem;
+}
+
+regiontable[record.get('Name')] = regionitem;
+    });
+
+    fetchNextPage();
+
+}, function done(err) {
+    if (err) { console.error(err); return; }
+    console.log(regiontable)
+
+    console.log(datespiracy)
+    console.log(datessmuggling)
+    console.log(datopiracy)
+    console.log(datosmuggling)
+
+
+
+ data = {
+  labels: dates,
+  datasets: [
+    {
+      label: 'Piracy',
+      data: "",
+      backgroundColor: '#F82B60',
+    },
+    {
+      label: 'Smuggling',
+      data: "",
+      backgroundColor: '#20C933',
+    },
+    {
+      label: 'Sighting',
+      data: "",
+      backgroundColor: '#FF6F2C',
+    },
+    {
+      label: 'Suspicious Approach',
+      data: "",
+      backgroundColor: '#FF6F2C',
+    },
+    {
+      label: 'Other',
+      data: "",
+      backgroundColor: '#2D7FF9',
+    },
+    {
+      label: 'Military Action',
+      data: "",
+      backgroundColor: '#F82B60',
+    }
+  ]
+};
+
+
+ config = {
+  type: 'bar',
+  data: data,
+  options: {
+    parsing: {
+      xAxisKey: 'date',
+      yAxisKey: 'numo'
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: regiontoparse + ' Chart'
+      },
+      tooltip: {
+            callbacks: {
+                title: function(context) {
+return "";
+                }
+            }
+        }
+    },
+    responsive: true,
+    scales: {
+      x: {
+        stacked: true,
+        type: 'time',
+        time: {
+          parser: 'YYYY-MM',
+          unit: 'month'
+        },
+        grid: {
+            display: false
+        }
+      },
+      y: {
+        stacked: true,
+        ticks: {
+          stepSize: 1
+        },
+        grid: {
+            display: false
+        }
+      }
+    }
+  }
+};
+
+
+
+   myChart = new Chart(
+    document.getElementById('RegionChart'),
+    config
+  );
+
+  $('#RegionChart').on('click', function(evt) {
+  const points = myChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+
+  if (points.length) {
+    const firstPoint = points[0];
+    const label = myChart.data.labels[firstPoint.index];
+    const slabel = myChart.data.datasets[firstPoint.datasetIndex].label;
+    const value = myChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index].incidents;
+$.dialog({
+    title: 'Incidents',
+    content: value,
+    theme: 'supervan'
+});
+
+  }
+});
+
+
+});
+
+
+</script>
+
+</body>
+</html>
