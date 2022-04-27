@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Maritime Security Monitor Charts</title>
+<title>Maritime Security Monitor - Indian Ocean</title>
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 <script src="airtable.browser.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -11,11 +11,39 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
+<style>
+  .loader {
+    border: 5px solid #c4bebe;
+    border-radius: 50%;
+    border-top: 5px solid #2e4353;
+    width: 20px;
+    height: 20px;
+    left:50%;
+    top:40%;
+    -webkit-animation: spin 1s linear infinite; /* Safari */
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Safari */
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% { transform: rotate(360deg); }
+  }
+  </style>
 </head>
 <body>
+  
 
     <div style="overflow-x: auto">
-        <div class="chart-container" style="position: relative; width:1000px">
+        <div class="chart-container" style="position: relative; width:1000px; background-color: #24507a8f;">
+          <div style="position: absolute" class="loader"></div>
         <canvas id="RegionChart"></canvas>
       </div>
     </div>
@@ -247,6 +275,10 @@ datomilitary.push(datomilitaryitems);
 if(i === record.get('Incidents').length-1){
 updateobj()
 myChart.update();
+if(records.length === idx+1) {
+  $('.loader').remove();
+  $('.chart-container').css('background-color', '');
+}
 }
 
 });
@@ -335,8 +367,8 @@ regiontable[record.get('Name')] = regionitem;
     plugins: {
       title: {
         display: true,
-        text: regiontoparse + ' Incidents by Month',
-        position: 'right'
+        text: regiontoparse + ' Chart',
+        position: 'bottom'
       },
       tooltip: {
             callbacks: {
@@ -344,6 +376,10 @@ regiontable[record.get('Name')] = regionitem;
 return "";
                 }
             }
+        },
+        legend: {
+          display: true,
+          position: 'bottom'
         }
     },
     responsive: true,
